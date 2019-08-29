@@ -19,7 +19,6 @@ void fchat_prpl_chat_join(PurpleConnection *gc, GHashTable *components) {
 		return;
 	}
 	if (g_strcmp0(room, "Main") != 0) {
-		printf("fchat_prpl_chat_join hat room can be used in fchat\n");
 		purple_debug_error("fchat", "Only '%s' chat room can be used in fchat\n", FCHAT_CHAT_ROOM_NAME);
 		return;
 	}
