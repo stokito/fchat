@@ -37,7 +37,7 @@ static void fchat_reconnect(FChatConnection *fchat_conn, FChatBuddy *buddy) {
 }
 
 void fchat_send_connect_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
-//[1][1]278[1][2]Chexum[1][8]C
+//[1][1]278[1][2]Alice[1][8]C
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	packet_blocks->protocol_version = g_strdup_printf("%d", fchat_conn->my_buddy->protocol_version);
 	packet_blocks->alias = fchat_encode(fchat_conn, fchat_conn->my_buddy->alias, -1);
@@ -52,7 +52,7 @@ void fchat_send_connect_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
  * @param can_connect Do we allow to connect to us?
  */
 void fchat_send_connect_confirm_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, gboolean can_connect) {
-//[1][1]278[1][2]OLEG[1][8]F[1][11]000000000000000000000000D2656333[1][12]BFFD4ECCD63C9A8125646077EB91A1D3[1][255]Y
+//[1][1]278[1][2]Alice[1][8]F[1][11]000000000000000000000000D2656333[1][12]BFFD4ECCD63C9A8125646077EB91A1D3[1][255]Y
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	packet_blocks->protocol_version = g_strdup_printf("%d", fchat_conn->my_buddy->protocol_version);
 	packet_blocks->alias = fchat_encode(fchat_conn, fchat_conn->my_buddy->alias, -1);
@@ -65,7 +65,7 @@ void fchat_send_connect_confirm_cmd(FChatConnection *fchat_conn, FChatBuddy *bud
 }
 
 void fchat_send_disconnect_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
-	//[1][1]278[1][2]Chexum[1][8]D
+	//[1][1]278[1][2]Alice[1][8]D
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = FCHAT_DISCONNECT_CMD;
 	packet_blocks->command = g_strndup(&str_cmd, 1);
@@ -89,7 +89,7 @@ void fchat_send_ping_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
  * Send a PONG packet to confirm that we are still online
  */
 void fchat_send_pong_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
-//[1][2]Chexum[1][8]Y
+//[1][2]Alice[1][8]Y
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = FCHAT_PONG_CMD;
 	packet_blocks->command = g_strndup(&str_cmd, 1);
@@ -102,8 +102,8 @@ void fchat_send_pong_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
  * @param msg_confirmation Ask to send a confirmation that the message was received
  */
 void fchat_send_msg_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, const gchar *msg_text,  FChatMsgType msg_type, gboolean msg_confirmation) {
-//[1][2]DESTROYER1[1][8]P[1][9]78[1][10][1][255]Hello  - personal
-//[1][2]Gambit[1][8]M[1][9]134[1][255]bye guys         - public
+//[1][2]Alice[1][8]P[1][9]78[1][10][1][255]Hello  - personal
+//[1][2]Alice[1][8]M[1][9]134[1][255]bye guys         - public
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = msg_type == FCHAT_MSG_TYPE_PRIVATE ? FCHAT_PRIVATE_MSG_CMD : FCHAT_MSG_CMD;
 	packet_blocks->command = g_strndup(&str_cmd, 1);
@@ -120,7 +120,7 @@ void fchat_send_msg_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, const gc
 }
 
 void fchat_send_confirm_msg_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, gchar *msg_id) {
-//[1][2]stokito[1][8]O[1][255]36
+//[1][2]Alice[1][8]O[1][255]36
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = FCHAT_CONFIRM_MSG_CMD;
 	packet_blocks->command = g_strndup(&str_cmd, 1);
@@ -130,7 +130,7 @@ void fchat_send_confirm_msg_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, 
 }
 
 void fchat_send_change_alias_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, const gchar *new_nickname) {
-//[1][2]mansonito[1][8]e[1][255]Мас[255]
+//[1][2]Alice[1][8]e[1][255]Adelaide[255]
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = FCHAT_ALIAS_CHANGE_CMD;
 	packet_blocks->command = g_strndup(&str_cmd, 1);
@@ -144,7 +144,7 @@ void fchat_send_change_alias_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy,
  * Send my status (auto responder) to the buddy e.g. when the status was changed.
  */
 void fchat_send_status_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, PurpleStatus *status) {
-//[1][2]OLEG[1][8]a[1][255]State:WarCraft;Y[1899-12-30 01:42:15][13][10]WarCraft
+//[1][2]Alice[1][8]a[1][255]State:WarCraft;Y[1899-12-30 01:42:15][13][10]WarCraft
 	/*	State:Busy;Y[1899-12-30 00:01:59]
 		State:Busy;N
 		State:;N */
@@ -185,7 +185,7 @@ void fchat_send_status_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, Purpl
 
 
 void fchat_send_beep_reply_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy,  FChatBeepReply reply) {
-//[1][2]DESTROYER[1][8]N[1][255]1
+//[1][2]Alice[1][8]N[1][255]1
 // '0' - Signal are not accepted from us
 // '1' - Signal are not accepted from anybody
 // Empty means that the signal was accepted
@@ -208,7 +208,7 @@ void fchat_send_beep_reply_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy,  
 }
 
 void fchat_send_beep_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
-//[1][2]DESTROYER[1][8]B
+//[1][2]Alice[1][8]B
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = FCHAT_BEEP_CMD;
 	packet_blocks->command = g_strndup(&str_cmd, 1);
@@ -217,7 +217,7 @@ void fchat_send_beep_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
 }
 
 void fchat_send_get_buddy_info_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
-//[1][2]admin[1][8]u
+//[1][2]Alice[1][8]u
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = FCHAT_GET_BUDDY_INFO_CMD;
 	packet_blocks->command = g_strndup(&str_cmd, 1);
@@ -226,7 +226,7 @@ void fchat_send_get_buddy_info_cmd(FChatConnection *fchat_conn, FChatBuddy *budd
 }
 
 void fchat_send_my_buddy_info_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
-//[1][2]admin[1][8]U[1][255]FChatVersion[2]4.6.1[2]FullName[2]Sergey Ponomarev[2]Male[2]1[2]Day[2]23[2]Month[2]12[2]Year[2]2000
+//[1][2]Alice[1][8]U[1][255]FChatVersion[2]4.6.1[2]FullName[2]Alice Doe[2]Female[2]1[2]Day[2]23[2]Month[2]12[2]Year[2]2000
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = FCHAT_BUDDY_INFO_CMD;
 	packet_blocks->command = g_strndup(&str_cmd, 1);
