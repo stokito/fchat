@@ -97,7 +97,7 @@ typedef struct {
 	gchar *msg;              /**< Тект сообщения. Обязательно последний!       */
 } FChatPacketBlocks;
 
-#define FCHAT_BLOCKS_COUNT sizeof(FChatPacketBlocks) / sizeof(gchar *)
+#define FCHAT_BLOCKS_COUNT (gint)(sizeof(FChatPacketBlocks) / sizeof(gchar *))
 
 typedef gchar **FChatPacketBlocksVector;
 static gchar fchat_blocks_order[FCHAT_BLOCKS_COUNT] = {
