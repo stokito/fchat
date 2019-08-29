@@ -9,7 +9,7 @@ const gchar *fchat_get_connection_codeset(FChatConnection *fchat_conn) {
 }
 
 gchar *fchat_encode(FChatConnection *fchat_conn, const gchar *str, gssize len) {
-	/* utf8 -> connection_codeset */
+	// utf8 -> connection_codeset
 	GError *error = NULL;
 	gchar *encoded_str = g_convert(str, len, fchat_get_connection_codeset(fchat_conn), "UTF-8", NULL, NULL, &error);
 	if (error) {
@@ -20,7 +20,7 @@ gchar *fchat_encode(FChatConnection *fchat_conn, const gchar *str, gssize len) {
 }
 
 gchar *fchat_decode(FChatConnection *fchat_conn, const gchar *str, gssize len) {
-	/* connection_codeset -> utf8 */
+	// connection_codeset -> utf8
 	GError *error = NULL;
 	gchar *decoded_str = g_convert(str, len, "UTF-8", fchat_get_connection_codeset(fchat_conn), NULL, NULL, &error);
 	if (error) {
@@ -30,14 +30,14 @@ gchar *fchat_decode(FChatConnection *fchat_conn, const gchar *str, gssize len) {
 	return decoded_str;
 }
 
+/**
+ * The function is called when a packet is received by a channel
+ * По идее мы берём и забираем из канала пришедшие байты:
+ * g_io_channel_read_chars(iochannel, buffer, sizeof (buffer), &bytes_received, &error);
+ * Но беда в том что нам нужен айпишник приславшего пакет.
+ * Поэтому выбирать мы будем не через абстрактный канал, а прямо из сокета.
+ */
 static gboolean fchat_receive_packet(GIOChannel *iochannel, GIOCondition c, gpointer data) {
-	/**
-	 * Это функция вызывается когда в канал сокета приходит пакет.
-	 * По идее мы берём и забираем из канала пришедшие байты:
-	 * g_io_channel_read_chars(iochannel, buffer, sizeof (buffer), &bytes_received, &error);
-	 * Но беда в том что нам нужен айпишник приславшего пакет.
-	 * Поэтому выбирать мы будем не через абстрактный канал, а прямо из сокета.
-	 */
 	FChatConnection *fchat_conn = (FChatConnection *)data;
 	gchar buffer[1024];
 	GError *error = NULL;

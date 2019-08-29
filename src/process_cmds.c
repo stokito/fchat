@@ -1,18 +1,18 @@
 #include "fchat.h"
 
 static void fchat_process_connect_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, FChatPacketBlocks *packet_blocks) {
-	/* Определяем версию протокола в пакете */
+    // Detect a protocol version from the packet
 	if (!purple_account_get_bool(fchat_conn->gc->account, "accept_unknown_protocol_version", TRUE)) {
 		gint proto_ver = atoi(packet_blocks->protocol_version);
 		if (FCHAT_MY_PROTOCOL_VERSION != proto_ver) {
-			/* неизвестный протокол, запрещаем связь */
+			// Unknown protocol version, denny the connection
 			purple_debug_info("fchat", "Another protocol version %d from %s, connection can't be established\n", proto_ver, buddy->host);
 			fchat_send_connect_confirm_cmd(fchat_conn, buddy, FALSE);
 			return;
 		}
 	}
 
-	/* Если собеседник уже в контакт листе... */
+    // If the buddy is already in contact list...
 	if (purple_find_buddy(fchat_conn->gc->account, buddy->host)) {
 		fchat_send_connect_confirm_cmd(fchat_conn, buddy, TRUE);
 		purple_prpl_got_user_status(fchat_conn->gc->account, buddy->host, FCHAT_STATUS_ONLINE, NULL);
@@ -31,6 +31,7 @@ static void fchat_process_connect_confirm_cmd(FChatConnection *fchat_conn, FChat
 		purple_prpl_got_user_status(fchat_conn->gc->account, buddy->host, FCHAT_STATUS_ONLINE, NULL);
 	} else {
 		/* TODO */
+		purple_debug_info("fchat", "Connection rejected from %s\n", buddy->host);
 	}
 }
 
@@ -90,11 +91,11 @@ static void fchat_process_beep_cmd(FChatConnection *fchat_conn, FChatBuddy *budd
 static void fchat_process_beep_reply_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, FChatPacketBlocks *packet_blocks) {
 	const gchar *msg;
 	if (!packet_blocks->msg) {
-		msg = _("Beep received");             /* BEEP_ACCEPTED The buddy received the beep */
+		msg = _("Beep received");             // BEEP_ACCEPTED The buddy received the beep
 	} else if (packet_blocks->msg[0] == '0') {
-		msg = _("Signal from you is denied"); /* BEEP_DENIED_FROM_YOU */
+		msg = _("Signal from you is denied"); // BEEP_DENIED_FROM_YOU
 	} else { /* packet_blocks->msg[0] == '1' */
-		msg = _("Signals are denied");        /* BEEP_DENIED_FROM_ALL */
+		msg = _("Signals are denied");        // BEEP_DENIED_FROM_ALL
 	}
 	serv_got_im(fchat_conn->gc, buddy->host, msg, PURPLE_MESSAGE_SYSTEM, time(NULL));
 }
@@ -231,7 +232,7 @@ static void fchat_process_get_buddy_list_cmd(FChatConnection *fchat_conn, FChatB
 			fchat_select_buddies_list_to_send_cb, fchat_select_buddies_list_to_send_cb, buddy);
 	} else if (buddy_list_privacy == FCHAT_BUDDIES_LIST_PRIVACY_ALLOW) {
 		fchat_send_buddies(fchat_conn, buddy, fchat_conn->buddies);
-	} else { /* FCHAT_BUDDIES_LIST_PRIVACY_DENY */
+	} else { // FCHAT_BUDDIES_LIST_PRIVACY_DENY
 		fchat_send_buddies(fchat_conn, buddy, NULL);
 	}
 }
@@ -277,14 +278,16 @@ static struct {
 	{ 0, 0, NULL }
 };
 
+/**
+ * Receive content of the Block. If the block is not present at all then return NULL
+ * Получить содержимое блока. Если блока нет вернёт NULL
+ * В тектовом блоке могут быть любые символы, в том числе и символы команд.
+ * Поэтому мы долюны преврять такие ситуации.
+ * Для этого сначала определяем позицию текстового блока и проверям не
+ * находится ли начало блока в текстовом блоке.
+ */
 static gchar *fchat_get_block_content(const gchar block_key, const gchar *packet) {
 	gchar *text_block_begin = NULL;
-	/* Получить содержимое блока. Если блока нет вернёт NULL
-	 * В тектовом блоке могут быть любые символы, в том числе и символы команд.
-	 * Поэтому мы долюны преврять такие ситуации.
-	 * Для этого сначала определяем позицию текстового блока и проверям не
-	 * находится ли начало блока в текстовом блоке.
-	*/
 	gchar needle[3];
 	needle[0] = (gchar)FCHAT_SEPARATOR_BLOCK;
 	needle[1] = (gchar)FCHAT_MSG_BLOCK;
@@ -295,14 +298,14 @@ static gchar *fchat_get_block_content(const gchar block_key, const gchar *packet
 		if (!text_block_begin) {
 			return NULL;
 		} else {
-			/* Смещаем указатель на два символа вперёд */
+			// Shift the pointer two chars forward
 			text_block_begin += 2;
 			return g_strdup(text_block_begin);
 		}
 	} else {
 		needle[1] = block_key;
 		gchar *begin_pos = strstr(packet, needle);
-		/* Если блок не найден или находится в тексте */
+		// If block not found or it's inside text
 		if (!begin_pos || (text_block_begin && (begin_pos >= text_block_begin))) {
 			return NULL;
 		} else {
@@ -318,14 +321,14 @@ static gchar *fchat_get_block_content(const gchar block_key, const gchar *packet
 }
 
 void fchat_process_packet(FChatConnection *fchat_conn, const gchar *host, const gchar *packet) {
-	/* Команда обязательна. Если её нет - пакет битый или он для другой проги */
+	// Command is required. If it not present this can mean that the packet is broken or it was from another protocol
 	gchar *command = fchat_get_block_content((gchar)FCHAT_COMMAND_BLOCK, packet);
 	if (!command || (*command == '\0')) {
 		purple_debug_warning("fchat", "Bad packet from host %s. There is not command in packet\n", host);
 		return;
 	}
 
-	/* Вызываем обработчик этой команды */
+	// Call a handler for the command
 	for (gint i = 0; fchat_msgs[i].command; i++) {
 		if (fchat_msgs[i].command == command[0]) {
 			/* Extract blocks */
