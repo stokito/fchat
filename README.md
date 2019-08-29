@@ -44,6 +44,14 @@ For other distros you can try to install from sources:
     make
     sudo make install
 
+#### Build deb package
+To build a Debian package f
+
+    dpkg-buildpackage -B
+
+And check the parent folder for the built `*.deb` files like `pidgin-fchat_1.0.2_amd64.deb`
+
+
 ## Usage
 
 * Open Pidgin, main menu Accounts / Add.
