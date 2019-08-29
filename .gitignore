@@ -1,2 +1,9 @@
 *.mo
 *.so
+.idea
+cmake-build-debug
+build-stamp
+configure-stamp
+debian/.debhelper
+debian/files
+debian/pidgin-fchat.substvars
