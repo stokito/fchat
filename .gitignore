@@ -8,3 +8,4 @@ debian/.debhelper
 debian/files
 debian/pidgin-fchat.substvars
 debian/pidgin-fchat
+debian/debhelper-build-stamp
