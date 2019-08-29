@@ -113,7 +113,7 @@ static void fchat_init(PurplePlugin *plugin) {
 	// see accountopt.h for information about user splits and protocol options
 	PurpleAccountOption *option;
 
-	// Кодировка из локалии
+	// Get charset from the system locale
 	const gchar *charset;
 	g_get_charset (&charset);
 	option = purple_account_option_string_new(_("Codeset"), "codeset", charset);

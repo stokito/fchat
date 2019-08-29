@@ -110,9 +110,9 @@ static gchar fchat_blocks_order[FCHAT_BLOCKS_COUNT] = {
 };
 
 typedef enum {
-	FCHAT_BEEP_ACEPTED,
-	FCHAT_BEEP_DENYED_FROM_ALL,
-	FCHAT_BEEP_DENYED_FROM_YOU
+	FCHAT_BEEP_ACCEPTED,
+	FCHAT_BEEP_DENIED_FROM_ALL,
+	FCHAT_BEEP_DENIED_FROM_YOU
 } FChatBeepReply;
 
 typedef enum {

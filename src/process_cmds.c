@@ -79,22 +79,22 @@ static void fchat_process_delete_msg_cmd(FChatConnection *fchat_conn, FChatBuddy
 static void fchat_process_beep_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, FChatPacketBlocks *packet_blocks) {
 	purple_prpl_got_attention(fchat_conn->gc, buddy->host, 0);
 	purple_sound_play_event(PURPLE_SOUND_POUNCE_DEFAULT,	fchat_conn->gc->account);
-	/* TODO FCHAT_BEEP_DENYED_FROM_YOU */
+	/* TODO FCHAT_BEEP_DENIED_FROM_YOU */
 	if (!purple_account_get_bool(fchat_conn->gc->account, "accept_beep", TRUE)) {
-		fchat_send_beep_reply_cmd(fchat_conn, buddy, FCHAT_BEEP_DENYED_FROM_ALL);
+		fchat_send_beep_reply_cmd(fchat_conn, buddy, FCHAT_BEEP_DENIED_FROM_ALL);
 	} else {
-		fchat_send_beep_reply_cmd(fchat_conn, buddy, FCHAT_BEEP_ACEPTED);
+		fchat_send_beep_reply_cmd(fchat_conn, buddy, FCHAT_BEEP_ACCEPTED);
 	}
 }
 
 static void fchat_process_beep_reply_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, FChatPacketBlocks *packet_blocks) {
 	const gchar *msg;
 	if (!packet_blocks->msg) {
-		msg = _("Beep received");             /* BEEP_ACEPTED Собеседник получил сигнал */
+		msg = _("Beep received");             /* BEEP_ACCEPTED The buddy received the beep */
 	} else if (packet_blocks->msg[0] == '0') {
-		msg = _("Signal from you is denied"); /* BEEP_DENYED_FROM_YOU */
+		msg = _("Signal from you is denied"); /* BEEP_DENIED_FROM_YOU */
 	} else { /* packet_blocks->msg[0] == '1' */
-		msg = _("Signals are denied");        /* BEEP_DENYED_FROM_ALL */
+		msg = _("Signals are denied");        /* BEEP_DENIED_FROM_ALL */
 	}
 	serv_got_im(fchat_conn->gc, buddy->host, msg, PURPLE_MESSAGE_SYSTEM, time(NULL));
 }

@@ -47,8 +47,11 @@ void fchat_send_connect_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
 	fchat_delete_packet_blocks(packet_blocks);
 }
 
+/**
+ * Send ACK for connection
+ * @param can_connect Do we allow to connect to us?
+ */
 void fchat_send_connect_confirm_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, gboolean can_connect) {
-// Послать разрешение на соединение
 //[1][1]278[1][2]OLEG[1][8]F[1][11]000000000000000000000000D2656333[1][12]BFFD4ECCD63C9A8125646077EB91A1D3[1][255]Y
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	packet_blocks->protocol_version = g_strdup_printf("%d", fchat_conn->my_buddy->protocol_version);
@@ -70,8 +73,10 @@ void fchat_send_disconnect_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
 	fchat_delete_packet_blocks(packet_blocks);
 }
 
+/**
+ * Send a PING packet to check the connection
+ */
 void fchat_send_ping_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
-// Послать проверку связи
 //[1][8]X
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = FCHAT_PING_CMD;
@@ -80,8 +85,10 @@ void fchat_send_ping_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
 	fchat_delete_packet_blocks(packet_blocks);
 }
 
+/**
+ * Send a PONG packet to confirm that we are still online
+ */
 void fchat_send_pong_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
-// Послать подтверждение связи
 //[1][2]Chexum[1][8]Y
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = FCHAT_PONG_CMD;
@@ -90,10 +97,13 @@ void fchat_send_pong_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
 	fchat_delete_packet_blocks(packet_blocks);
 }
 
+/**
+ * Send a message
+ * @param msg_confirmation Ask to send a confirmation that the message was received
+ */
 void fchat_send_msg_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, const gchar *msg_text,  FChatMsgType msg_type, gboolean msg_confirmation) {
-// Послать сообщение
-//[1][2]DESTROYER1[1][8]P[1][9]78[1][10][1][255]хай      - персональное
-//[1][2]Gambit[1][8]M[1][9]134[1][255]всё люди я немогу  - общее
+//[1][2]DESTROYER1[1][8]P[1][9]78[1][10][1][255]Hello  - personal
+//[1][2]Gambit[1][8]M[1][9]134[1][255]bye guys         - public
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = msg_type == FCHAT_MSG_TYPE_PRIVATE ? FCHAT_PRIVATE_MSG_CMD : FCHAT_MSG_CMD;
 	packet_blocks->command = g_strndup(&str_cmd, 1);
@@ -130,8 +140,10 @@ void fchat_send_change_alias_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy,
 }
 
 
+/**
+ * Send my status (auto responder) to the buddy e.g. when the status was changed.
+ */
 void fchat_send_status_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, PurpleStatus *status) {
-// Послать контакту мой автоответчик (если изменился к примеру)
 //[1][2]OLEG[1][8]a[1][255]State:WarCraft;Y[1899-12-30 01:42:15][13][10]WarCraft
 	/*	State:Busy;Y[1899-12-30 00:01:59]
 		State:Busy;N
@@ -174,16 +186,16 @@ void fchat_send_status_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, Purpl
 
 void fchat_send_beep_reply_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy,  FChatBeepReply reply) {
 //[1][2]DESTROYER[1][8]N[1][255]1
-// '0' - Сигналы от нас не принимаются
-// '1' - Сигналы не принимаются вообще
-// Пусто сигнал принят
+// '0' - Signal are not accepted from us
+// '1' - Signal are not accepted from anybody
+// Empty means that the signal was accepted
 
 	gchar *msg_beep_reply;
-	if (reply == FCHAT_BEEP_ACEPTED) {
+	if (reply == FCHAT_BEEP_ACCEPTED) {
 		msg_beep_reply = NULL;
-	} else if (reply == FCHAT_BEEP_DENYED_FROM_YOU) {
+	} else if (reply == FCHAT_BEEP_DENIED_FROM_YOU) {
 		msg_beep_reply = "0";
-	} else  { // reply = BEEP_DENYED_FROM_ALL
+	} else  { // reply = BEEP_DENIED_FROM_ALL
 		msg_beep_reply = "1";
 	}
 
@@ -253,11 +265,9 @@ void fchat_send_get_buddies(FChatConnection *fchat_conn, FChatBuddy *buddy) {
 }
 
 /**
- * fchat_send_buddies:
- * @buddies: NULL terminated array of buddies.
- *
  * Send buddies list for requester buddy.
- **/
+ * @buddies: NULL terminated array of buddies.
+ */
 void fchat_send_buddies(FChatConnection *fchat_conn, FChatBuddy *buddy, GHashTable *buddies) {
 	/* Format: msg = 192.168.56.1192.168.56.1host10.0.2.2хост 10.111.28.16010.111.28.160
 	 * msg = "1" - means that buddy list is denied  */

@@ -82,7 +82,7 @@ void fchat_prpl_login(PurpleAccount *account) {
 	fchat_conn->my_buddy->protocol_version = FCHAT_MY_PROTOCOL_VERSION;
 	fchat_conn->my_buddy->info = fchat_load_my_buddy_info(account);
 
-	// Создаём сокет на заданом в настроках айпишнике и порте
+	// Create a socket on the IP and Port specified in settings
 	GError *error = NULL;
 	fchat_conn->socket = g_socket_new(G_SOCKET_FAMILY_IPV4, G_SOCKET_TYPE_DATAGRAM, G_SOCKET_PROTOCOL_UDP, &error);
 	if (fchat_conn->socket) {
@@ -111,7 +111,7 @@ void fchat_prpl_login(PurpleAccount *account) {
 	g_io_channel_set_close_on_unref(fchat_conn->channel, TRUE);
 
 	g_io_add_watch(fchat_conn->channel, G_IO_IN | G_IO_PRI, (GIOFunc) fchat_receive_packet, fchat_conn);
-	// G_IO_NVAL мы не перехватываем поскольку когда удаляетя сокет дискриптор закрывается а потом он ещё закрываетя через канал и мы отхватываем ошибку
+	// We are not interested in G_IO_NVAL because when the socket descriptor is closed and then it closes second time in channel so we get an error
 	g_io_add_watch(fchat_conn->channel, G_IO_ERR | G_IO_HUP, (GIOFunc) fchat_receive_packet_error, fchat_conn);
 	fchat_conn->next_id = 0;
 
