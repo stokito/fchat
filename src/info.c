@@ -112,8 +112,7 @@ gchar *fchat_buddy_info_serialize(FChatBuddyInfo *info, const gchar *from_codese
 		add_str_param_to_info(data, "Interest", info->interest, from_codeset);
 		add_str_param_to_info(data, "Additional", info->additional, from_codeset);
 	}
-	gchar *serialized_info = data->str;
-	g_string_free(data, FALSE);
+	gchar *serialized_info = g_string_free_and_steal(data);
 	return serialized_info;
 }
 
