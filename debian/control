@@ -7,6 +7,8 @@ Build-Depends: debhelper (>= 11), libpurple-dev (>= 1:2.13.0-1ubuntu1)
 Homepage: https://github.com/stokito/pidgin-fchat
 Vcs-Browser: https://github.com/stokito/pidgin-pidgin
 Vcs-Git: https://github.com/stokito/pidgin-fchat.git
+Bugs: https://github.com/stokito/pidgin-fchat/issues
+#Tags: implemented-in::c, network::client, protocol::udp, works-with::im, use::chatting
 
 Package: pidgin-fchat
 Architecture: any
