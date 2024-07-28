@@ -1,3 +1,9 @@
+pidgin-fchat (1.1.0) stable; urgency=low
+
+  * Refresh
+
+ -- Sergey Ponomarev <stokito@gmail.com>  Sun, 28 Jul 2024 17:30:00 +0200
+
 pidgin-fchat (1.0.1) disco; urgency=low
 
   * Recompiled for new libpurple
