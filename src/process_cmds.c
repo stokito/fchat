@@ -1,7 +1,7 @@
 #include "fchat.h"
 
 static void fchat_process_connect_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, FChatPacketBlocks *packet_blocks) {
-    // Detect a protocol version from the packet
+	// Detect a protocol version from the packet
 	if (!purple_account_get_bool(fchat_conn->gc->account, "accept_unknown_protocol_version", TRUE)) {
 		gint proto_ver = atoi(packet_blocks->protocol_version);
 		if (FCHAT_MY_PROTOCOL_VERSION != proto_ver) {
@@ -12,7 +12,7 @@ static void fchat_process_connect_cmd(FChatConnection *fchat_conn, FChatBuddy *b
 		}
 	}
 
-    // If the buddy is already in contact list...
+	// If the buddy is already in contact list...
 	if (purple_find_buddy(fchat_conn->gc->account, buddy->host)) {
 		fchat_send_connect_confirm_cmd(fchat_conn, buddy, TRUE);
 		purple_prpl_got_user_status(fchat_conn->gc->account, buddy->host, FCHAT_STATUS_ONLINE, NULL);
@@ -91,11 +91,11 @@ static void fchat_process_beep_cmd(FChatConnection *fchat_conn, FChatBuddy *budd
 static void fchat_process_beep_reply_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, FChatPacketBlocks *packet_blocks) {
 	const gchar *msg;
 	if (!packet_blocks->msg) {
-		msg = _("Beep received");             // BEEP_ACCEPTED The buddy received the beep
+		msg = _("Beep received");
 	} else if (packet_blocks->msg[0] == '0') {
-		msg = _("Signal from you is denied"); // BEEP_DENIED_FROM_YOU
+		msg = _("Signal from you is denied");
 	} else { /* packet_blocks->msg[0] == '1' */
-		msg = _("Signals are denied");        // BEEP_DENIED_FROM_ALL
+		msg = _("Signals are denied");
 	}
 	serv_got_im(fchat_conn->gc, buddy->host, msg, PURPLE_MESSAGE_SYSTEM, time(NULL));
 }
@@ -160,8 +160,9 @@ static void fchat_process_get_buddy_info_cmd(FChatConnection *fchat_conn, FChatB
 }
 
 static void fchat_process_buddy_info_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, FChatPacketBlocks *packet_blocks) {
+	const gchar *codeset = fchat_get_connection_codeset(fchat_conn);
 	PurpleConnection *gc = fchat_conn->gc;
-	FChatBuddyInfo *info = fchat_parse_buddy_info(packet_blocks->msg, fchat_get_connection_codeset(fchat_conn));
+	FChatBuddyInfo *info = fchat_parse_buddy_info(packet_blocks->msg, codeset);
 	PurpleNotifyUserInfo *purple_info = fchat_buddy_info_to_purple_info(info);
 	/* show a buddy's user info in a nice dialog box */
 	purple_notify_userinfo(gc, buddy->host,	purple_info, NULL, NULL);
@@ -247,13 +248,13 @@ typedef enum {
 
 static struct {
 	gchar command;
-	BlocksToParse blocks_to_parse; /**< Битовая маска блоки которые нужно извлечь из пакета */
+	BlocksToParse blocks_to_parse; /** bit-mask of blocks that should be extracted from a packet */
 	void (*cb)(FChatConnection *fchat_conn, FChatBuddy *buddy, FChatPacketBlocks *packet_blocks);
 } fchat_msgs[] = {
-	{ FCHAT_CONNECT_CMD, BLOCK_PROTOCOL_VERSION + BLOCK_NICKNAME, fchat_process_connect_cmd },
-	{ FCHAT_CONNECT_CONFIRM_CMD, BLOCK_PROTOCOL_VERSION + BLOCK_NICKNAME + BLOCK_MSG, fchat_process_connect_confirm_cmd },
 	{ FCHAT_PING_CMD, 0, fchat_process_ping_cmd },
 	{ FCHAT_PONG_CMD, 0, fchat_process_pong_cmd },
+	{ FCHAT_CONNECT_CMD, BLOCK_PROTOCOL_VERSION + BLOCK_NICKNAME, fchat_process_connect_cmd },
+	{ FCHAT_CONNECT_CONFIRM_CMD, BLOCK_PROTOCOL_VERSION + BLOCK_NICKNAME + BLOCK_MSG, fchat_process_connect_confirm_cmd },
 	{ FCHAT_DISCONNECT_CMD, 0, fchat_process_disconnect_cmd },
 
 	{ FCHAT_MSG_CMD, BLOCK_MSG_ID + BLOCK_MSG_CONFIRMATION + BLOCK_MSG, fchat_process_msg_cmd },
@@ -279,12 +280,10 @@ static struct {
 };
 
 /**
- * Receive content of the Block. If the block is not present at all then return NULL
- * Получить содержимое блока. Если блока нет вернёт NULL
- * В тектовом блоке могут быть любые символы, в том числе и символы команд.
- * Поэтому мы долюны преврять такие ситуации.
- * Для этого сначала определяем позицию текстового блока и проверям не
- * находится ли начало блока в текстовом блоке.
+ * Receive content of the Block. If the block is not present at all then return NULL.
+ * There can be any characters in the text block, including the command symbols.
+ * Therefore, we must check for such situation.
+ * For this, we first determine the position of the text block and check whether the block in the text block is located.
  */
 static gchar *fchat_get_block_content(const gchar block_key, const gchar *packet) {
 	gchar *text_block_begin = NULL;
@@ -321,7 +320,7 @@ static gchar *fchat_get_block_content(const gchar block_key, const gchar *packet
 }
 
 void fchat_process_packet(FChatConnection *fchat_conn, const gchar *host, const gchar *packet) {
-	// Command is required. If it not present this can mean that the packet is broken or it was from another protocol
+	// Command is required. If it's absent, this can mean that the packet is broken or it was from another protocol
 	gchar *command = fchat_get_block_content((gchar)FCHAT_COMMAND_BLOCK, packet);
 	if (!command || (*command == '\0')) {
 		purple_debug_warning("fchat", "Bad packet from host %s. There is not command in packet\n", host);
@@ -330,25 +329,26 @@ void fchat_process_packet(FChatConnection *fchat_conn, const gchar *host, const 
 
 	// Call a handler for the command
 	for (gint i = 0; fchat_msgs[i].command; i++) {
-		if (fchat_msgs[i].command == command[0]) {
-			/* Extract blocks */
-			FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
-			packet_blocks->command = command;
-			FChatPacketBlocksVector packet_blocks_v = (FChatPacketBlocksVector)packet_blocks;
-			int base2 = 1;
-			for (int block_num = 1; block_num < FCHAT_BLOCKS_COUNT; block_num++) {
-				if (fchat_msgs[i].blocks_to_parse & base2) {
-					packet_blocks_v[block_num] = fchat_get_block_content(fchat_blocks_order[block_num], packet);
-				}
-				base2 = base2 * 2;
-			}
-			fchat_debug_print_packet_blocks(fchat_conn, packet_blocks);
-			FChatBuddy *buddy = fchat_find_buddy(fchat_conn, host, NULL, TRUE);
-			buddy->last_packet_time = time(NULL);
-			fchat_msgs[i].cb(fchat_conn, buddy, packet_blocks);
-			fchat_delete_packet_blocks(packet_blocks);
-			return;
+		if (fchat_msgs[i].command != command[0]) {
+			continue;
 		}
+		/* Extract blocks */
+		FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
+		packet_blocks->command = command;
+		FChatPacketBlocksVector packet_blocks_v = (FChatPacketBlocksVector) packet_blocks;
+		int base2 = 1;
+		for (int block_num = 1; block_num < FCHAT_BLOCKS_COUNT; block_num++) {
+			if (fchat_msgs[i].blocks_to_parse & base2) {
+				packet_blocks_v[block_num] = fchat_get_block_content(fchat_blocks_order[block_num], packet);
+			}
+			base2 = base2 * 2;
+		}
+		fchat_debug_print_packet_blocks(fchat_conn, packet_blocks);
+		FChatBuddy *buddy = fchat_find_buddy(fchat_conn, host, NULL, TRUE);
+		buddy->last_packet_time = time(NULL);
+		fchat_msgs[i].cb(fchat_conn, buddy, packet_blocks);
+		fchat_delete_packet_blocks(packet_blocks);
+		return;
 	}
 	purple_debug_warning("fchat", "Unknown or unsupported command '%s' (%d)\n", command, command[0]);
 }

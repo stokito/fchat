@@ -11,7 +11,8 @@ const gchar *fchat_get_connection_codeset(FChatConnection *fchat_conn) {
 gchar *fchat_encode(FChatConnection *fchat_conn, const gchar *str, gssize len) {
 	// utf8 -> connection_codeset
 	GError *error = NULL;
-	gchar *encoded_str = g_convert(str, len, fchat_get_connection_codeset(fchat_conn), "UTF-8", NULL, NULL, &error);
+	const gchar *codeset = fchat_get_connection_codeset(fchat_conn);
+	gchar *encoded_str = g_convert(str, len, codeset, "UTF-8", NULL, NULL, &error);
 	if (error) {
 		purple_debug_error("fchat", "Couldn't convert string: %s\n", error->message);
 		g_error_free(error);
@@ -22,7 +23,8 @@ gchar *fchat_encode(FChatConnection *fchat_conn, const gchar *str, gssize len) {
 gchar *fchat_decode(FChatConnection *fchat_conn, const gchar *str, gssize len) {
 	// connection_codeset -> utf8
 	GError *error = NULL;
-	gchar *decoded_str = g_convert(str, len, "UTF-8", fchat_get_connection_codeset(fchat_conn), NULL, NULL, &error);
+	const gchar *codeset = fchat_get_connection_codeset(fchat_conn);
+	gchar *decoded_str = g_convert(str, len, "UTF-8", codeset, NULL, NULL, &error);
 	if (error) {
 		purple_debug_error("fchat", "Couldn't convert string: %s\n", error->message);
 		g_error_free(error);
@@ -32,10 +34,10 @@ gchar *fchat_decode(FChatConnection *fchat_conn, const gchar *str, gssize len) {
 
 /**
  * The function is called when a packet is received by a channel
- * По идее мы берём и забираем из канала пришедшие байты:
+ * We can simply et bytes from a channel:
  * g_io_channel_read_chars(iochannel, buffer, sizeof (buffer), &bytes_received, &error);
- * Но беда в том что нам нужен айпишник приславшего пакет.
- * Поэтому выбирать мы будем не через абстрактный канал, а прямо из сокета.
+ * But this doesn't gives us an IP address of the sender.
+ * That's why we have to read from a socket.
  */
 static gboolean fchat_receive_packet(GIOChannel *iochannel, GIOCondition c, gpointer data) {
 	FChatConnection *fchat_conn = (FChatConnection *)data;
@@ -148,30 +150,37 @@ void fchat_prpl_close(PurpleConnection *gc) {
 
 gboolean fchat_keepalive(gpointer data) {
 	FChatConnection *fchat_conn = data;
-	purple_debug_info("fchat", "fchat_prpl_keepalive %d %d\n", fchat_conn->keepalive_timeout, fchat_conn->keepalive_periods);
-	fchat_conn->timer = purple_timeout_add_seconds((guint) (fchat_conn->keepalive_timeout * 60), fchat_keepalive, fchat_conn);
 
 	GHashTableIter iter;
 	gchar *buddy_host;
 	FChatBuddy *buddy;
 	g_hash_table_iter_init (&iter, fchat_conn->buddies);
-	while (g_hash_table_iter_next (&iter, (gpointer *)&buddy_host, (gpointer *)&buddy)) {
-		if (time(NULL) - buddy->last_packet_time >= fchat_conn->keepalive_periods * fchat_conn->keepalive_timeout * 60) {
-			purple_prpl_got_user_status(fchat_conn->gc->account, buddy->host, FCHAT_STATUS_OFFLINE, NULL);
-		} else if (time(NULL) - buddy->last_packet_time >= fchat_conn->keepalive_timeout * 60) {
+	while (g_hash_table_iter_next(&iter, (gpointer *) &buddy_host, (gpointer *) &buddy)) {
+		time_t passed_time = time(NULL) - buddy->last_packet_time;
+		if (passed_time >= fchat_conn->keepalive_timeout * 60) {
+			purple_debug_info("fchat", "fchat_keepalive timer ping %s\n", buddy->host);
 			fchat_send_ping_cmd(fchat_conn, buddy);
+			// if the buddy was online now didn't answer for a while, then set it offline
+			if (buddy->last_packet_time &&
+				(passed_time >= fchat_conn->keepalive_periods * fchat_conn->keepalive_timeout * 60)) {
+				purple_debug_info("fchat", "fchat_keepalive timer went offline %s\n", buddy->host);
+				purple_prpl_got_user_status(fchat_conn->gc->account, buddy->host, FCHAT_STATUS_OFFLINE, NULL);
+			}
 		}
 	}
+	fchat_conn->timer = purple_timeout_add_seconds((guint) (fchat_conn->keepalive_timeout * 60), fchat_keepalive, fchat_conn);
 	return FALSE;
 }
 
 void fchat_connection_delete(FChatConnection *fchat_conn) {
-	if (fchat_conn->timer)
+	if (fchat_conn->timer) {
 		purple_timeout_remove(fchat_conn->timer);
+	}
 	g_clear_object(&fchat_conn->socket);
 	g_io_channel_unref(fchat_conn->channel);
-	if (fchat_conn->buddies)
+	if (fchat_conn->buddies) {
 		g_hash_table_destroy(fchat_conn->buddies);
+	}
 	fchat_buddy_delete(fchat_conn->my_buddy);
 	g_free(fchat_conn);
 }

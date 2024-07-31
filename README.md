@@ -1,4 +1,4 @@
-# FChat protocol plugin for libpurple (Pidgin)
+# Friendly Chat (FChat) protocol plugin for libpurple (Pidgin)
 
 The [FChat](http://www.kilievich.com/fchat/) is one of the famous in past peer-to-peer (p2p) chat programs for local networks.
 Original FChat had a support of IRC protocol and itself FChat protocol which is lightweight and based on UDP datagrams.

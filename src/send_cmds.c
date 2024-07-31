@@ -10,7 +10,7 @@ void fchat_send_packet(FChatConnection *fchat_conn, FChatBuddy *buddy, FChatPack
 	gssize sent = g_socket_send_to(fchat_conn->socket, address, str->str, str->len, NULL, &err);
 	if (err) {
 		purple_debug_error("fchat", "Error on sending a packet to %s :%s\n", buddy->host, err->message);
-	} else if (sent < str->len) {
+	} else if (sent < (gssize)str->len) {
 		purple_debug_error("fchat", "Can't send a packet to %s\n", buddy->host);
 	}
 	g_string_free(str, TRUE);
@@ -107,11 +107,8 @@ void fchat_send_msg_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy, const gc
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = msg_type == FCHAT_MSG_TYPE_PRIVATE ? FCHAT_PRIVATE_MSG_CMD : FCHAT_MSG_CMD;
 	packet_blocks->command = g_strndup(&str_cmd, 1);
-	// Когда отсылается сообщение вместе с ним передаётся его идентификатор.
-	// Когда требуется подтверждения о доставке, этот идентификатор посылается обратно,
-	// что сообщение с таким-то кодом получено.
-	// В класическом ФЧАТе стоит чётчик и просто проходит инкрементация его значения,
-	// тобто новый код = старый код + 1
+	// Each message has own id that is used in reply for delivery.
+	// The classic FChat uses just incremental id.
 	packet_blocks->msg_id = g_strdup_printf("%d", fchat_conn->next_id++);
 	packet_blocks->msg_confirmation = g_strdup(msg_confirmation ? "\0" : NULL); // Если требуется подтверждение о доставке
 	packet_blocks->msg = fchat_encode(fchat_conn, msg_text, -1);
@@ -227,10 +224,11 @@ void fchat_send_get_buddy_info_cmd(FChatConnection *fchat_conn, FChatBuddy *budd
 
 void fchat_send_my_buddy_info_cmd(FChatConnection *fchat_conn, FChatBuddy *buddy) {
 	//[1][2]Alice[1][8]U[1][255]FChatVersion[2]4.6.1[2]FullName[2]Alice Doe[2]Female[2]1[2]Day[2]23[2]Month[2]12[2]Year[2]2000
+	const gchar *codeset = fchat_get_connection_codeset(fchat_conn);
 	FChatPacketBlocks *packet_blocks = g_new0(FChatPacketBlocks, 1);
 	gchar str_cmd = FCHAT_BUDDY_INFO_CMD;
 	packet_blocks->command = g_strndup(&str_cmd, 1);
-	packet_blocks->msg = fchat_buddy_info_serialize(fchat_conn->my_buddy->info, fchat_get_connection_codeset(fchat_conn));
+	packet_blocks->msg = fchat_buddy_info_serialize(fchat_conn->my_buddy->info, codeset);
 	fchat_send_packet(fchat_conn, buddy, packet_blocks);
 	fchat_delete_packet_blocks(packet_blocks);
 }
@@ -273,7 +271,7 @@ void fchat_send_buddies(FChatConnection *fchat_conn, FChatBuddy *buddy, GHashTab
 	 * msg = "1" - means that buddy list is denied  */
 	gchar *msg;
 	if (buddies) {
-		gint size = g_hash_table_size(buddies);
+		guint size = g_hash_table_size(buddies);
 		/**
 		 * buddies_v is NULL terminated string vector
 		 * "2 * size" because on one alias (separator) host

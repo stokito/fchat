@@ -39,7 +39,7 @@ GList *fchat_prpl_status_types(PurpleAccount *account) {
 		NULL);
 	types = g_list_prepend(types, type);
 
-	type = purple_status_type_new(PURPLE_STATUS_OFFLINE, NULL, NULL, TRUE);
+	type = purple_status_type_new(PURPLE_STATUS_OFFLINE, FCHAT_STATUS_OFFLINE, NULL, TRUE);
 	types = g_list_append(types, type);
 
 	return types;

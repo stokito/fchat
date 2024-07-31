@@ -79,7 +79,7 @@ gint fchat_prpl_chat_send(PurpleConnection *gc, gint id, const gchar *message, P
 		purple_debug_error("fchat", "tried to send message to chat room #%d: %s\n but couldn't find chat room", id, message);
 		return -1;
 	}
-	// send message to everyone in the chat room
+	// send a message to everyone in the chat room
 	SendPublicChatMsgData *data = g_new(SendPublicChatMsgData, 1);
 	data->fchat_conn = (FChatConnection *)gc->proto_data;
 	data->message = message;

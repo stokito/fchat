@@ -74,7 +74,7 @@ void fchat_prpl_remove_buddy(PurpleConnection *gc, PurpleBuddy *buddy, PurpleGro
 }
 
 FChatBuddy **fchat_get_buddies_list_all(FChatConnection *fchat_conn) {
-	gint size = g_hash_table_size(fchat_conn->buddies);
+	guint size = g_hash_table_size(fchat_conn->buddies);
 	FChatBuddy **buddies_list = g_new(FChatBuddy *, size + 1); /* ... and 1 element for NULL */
 	gint i = 0;
 	GHashTableIter iter;
@@ -107,15 +107,17 @@ static void fchat_select_buddies_list_ok_cb(FChatSelectBuddiesListCbData *fchat_
 	}
 	g_list_free(selected_items);
 
-	if (fchat_select_buddies_list_cb_data->ok_cb)
+	if (fchat_select_buddies_list_cb_data->ok_cb) {
 		fchat_select_buddies_list_cb_data->ok_cb(fchat_select_buddies_list_cb_data->fchat_conn, buddies, fchat_select_buddies_list_cb_data->user_data);
+	}
 	g_hash_table_destroy(buddies);
 	g_free(fchat_select_buddies_list_cb_data);
 }
 
 static void fchat_select_buddies_list_cancel_cb(FChatSelectBuddiesListCbData *fchat_select_buddies_list_cb_data, PurpleRequestFields *fields) {
-	if (fchat_select_buddies_list_cb_data->cancel_cb)
+	if (fchat_select_buddies_list_cb_data->cancel_cb) {
 		fchat_select_buddies_list_cb_data->cancel_cb(fchat_select_buddies_list_cb_data->fchat_conn, NULL, fchat_select_buddies_list_cb_data->user_data);
+	}
 	g_free(fchat_select_buddies_list_cb_data);
 }
 

@@ -24,11 +24,9 @@ static void fchat_action_set_msg_board(PurplePluginAction *action) {
 GList *fchat_prpl_actions(PurplePlugin *plugin, gpointer context) {
 	GList *actions = NULL;
 	PurplePluginAction *action;
-	action = purple_plugin_action_new(
-			_("Set user info..."), fchat_action_set_user_info);
+	action = purple_plugin_action_new(_("Set user info..."), fchat_action_set_user_info);
 	actions = g_list_append(actions, action);
-	action = purple_plugin_action_new(
-			_("Set message board..."), fchat_action_set_msg_board);
+	action = purple_plugin_action_new(_("Set message board..."), fchat_action_set_msg_board);
 	actions = g_list_append(actions, action);
 	return actions;
 }

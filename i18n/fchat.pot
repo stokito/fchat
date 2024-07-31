@@ -1,14 +1,8 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the fchat package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: fchat\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-19 05:11+0200\n"
+"POT-Creation-Date: 2024-08-01 20:14+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,31 +19,31 @@ msgstr ""
 msgid "Set message board text"
 msgstr ""
 
-#: src/actions.c:18 src/info.c:305
+#: src/actions.c:18 src/info.c:342
 msgid "Save"
 msgstr ""
 
-#: src/actions.c:18 src/buddy.c:154 src/info.c:306
+#: src/actions.c:18 src/buddy.c:156 src/info.c:343
 msgid "Cancel"
 msgstr ""
 
-#: src/actions.c:28
+#: src/actions.c:27
 msgid "Set user info..."
 msgstr ""
 
-#: src/actions.c:31
+#: src/actions.c:29
 msgid "Set message board..."
 msgstr ""
 
-#: src/actions.c:62
+#: src/actions.c:60
 msgid "Send Beep"
 msgstr ""
 
-#: src/actions.c:69
+#: src/actions.c:67
 msgid "Get board message..."
 msgstr ""
 
-#: src/actions.c:76
+#: src/actions.c:74
 msgid "Get buddies..."
 msgstr ""
 
@@ -67,197 +61,197 @@ msgstr ""
 msgid "Nudging %s..."
 msgstr ""
 
-#: src/buddy.c:130
+#: src/buddy.c:132
 msgid "Buddies"
 msgstr ""
 
-#: src/buddy.c:151
+#: src/buddy.c:153
 msgid "Select buddies"
 msgstr ""
 
-#: src/buddy.c:152
+#: src/buddy.c:154
 msgid "Use Ctrl or Shift keys for multiply select"
 msgstr ""
 
-#: src/buddy.c:153
+#: src/buddy.c:155
 msgid "Ok"
 msgstr ""
 
-#: src/chat.c:45
+#: src/chat.c:44
 msgid "Chat _room"
 msgstr ""
 
-#: src/chat.c:57
+#: src/chat.c:56
 msgid "room"
 msgstr ""
 
-#: src/connection.c:79
+#: src/connection.c:81
 msgid "Incorrect address"
 msgstr ""
 
-#: src/connection.c:91
+#: src/connection.c:93
 msgid "Couldn't create UDP socket"
 msgstr ""
 
-#: src/connection.c:100
+#: src/connection.c:102
 msgid "Socket addr is incorrect"
 msgstr ""
 
-#: src/connection.c:103
+#: src/connection.c:105
 msgid "Error bind"
 msgstr ""
 
-#: src/fchat.c:119
+#: src/fchat.c:129
 msgid "Codeset"
 msgstr ""
 
-#: src/fchat.c:122
+#: src/fchat.c:132
 msgid "Port"
 msgstr ""
 
-#: src/fchat.c:125
+#: src/fchat.c:135
 msgid "Use broadcast"
 msgstr ""
 
-#: src/fchat.c:128
+#: src/fchat.c:138
 msgid "Accept unknown protocol version"
 msgstr ""
 
-#: src/fchat.c:131
+#: src/fchat.c:141
 msgid "Keepalive interval"
 msgstr ""
 
-#: src/fchat.c:134
+#: src/fchat.c:144
 msgid "Keepalive periods"
 msgstr ""
 
-#: src/fchat.c:137
+#: src/fchat.c:147
 msgid "Require authorization for new contacts"
 msgstr ""
 
-#: src/fchat.c:140
+#: src/fchat.c:150
 msgid "Confirm private messages"
 msgstr ""
 
-#: src/fchat.c:143
+#: src/fchat.c:153
 msgid "Confirm public messages"
 msgstr ""
 
-#: src/fchat.c:146
+#: src/fchat.c:156
 msgid "Allow beep"
 msgstr ""
 
-#: src/fchat.c:152
-msgid "Deny"
-msgstr ""
-
-#: src/fchat.c:156
+#: src/fchat.c:162
 msgid "Request"
 msgstr ""
 
-#: src/fchat.c:160
+#: src/fchat.c:166
 msgid "Allow"
 msgstr ""
 
-#: src/fchat.c:164
+#: src/fchat.c:170
+msgid "Deny"
+msgstr ""
+
+#: src/fchat.c:174
 msgid "Buddy list privacy"
 msgstr ""
 
-#: src/info.c:124 src/info.c:245
+#: src/info.c:121 src/info.c:282
 msgid "Full name"
 msgstr ""
 
-#: src/info.c:128 src/info.c:138 src/info.c:251
+#: src/info.c:125 src/info.c:135 src/info.c:288
 msgid "Male"
 msgstr ""
 
-#: src/info.c:131 src/info.c:250
+#: src/info.c:128 src/info.c:287
 msgid "Female"
 msgstr ""
 
-#: src/info.c:143
+#: src/info.c:140
 msgid "Birthday"
 msgstr ""
 
-#: src/info.c:146 src/info.c:285
+#: src/info.c:143 src/info.c:322
 msgid "Address"
 msgstr ""
 
-#: src/info.c:147 src/info.c:288 src/status.c:31
+#: src/info.c:144 src/info.c:325 src/status.c:31
 msgid "Phone"
 msgstr ""
 
-#: src/info.c:148
+#: src/info.c:145
 msgid "Email"
 msgstr ""
 
-#: src/info.c:149 src/info.c:294
+#: src/info.c:146 src/info.c:331
 msgid "Interest"
 msgstr ""
 
-#: src/info.c:150 src/info.c:297
+#: src/info.c:147 src/info.c:334
 msgid "Additional"
 msgstr ""
 
-#: src/info.c:248
+#: src/info.c:285
 msgid "Sex"
 msgstr ""
 
-#: src/info.c:249
+#: src/info.c:286
 msgid "Not specified"
 msgstr ""
 
-#: src/info.c:254
+#: src/info.c:291
 msgid "Birthday day"
 msgstr ""
 
-#: src/info.c:265
+#: src/info.c:302
 msgid "Birthday month"
 msgstr ""
 
-#: src/info.c:274
+#: src/info.c:311
 msgid "Birthday year"
 msgstr ""
 
-#: src/info.c:291
+#: src/info.c:328
 msgid "E-mail"
 msgstr ""
 
-#: src/info.c:300
+#: src/info.c:337
 msgid "Edit info"
 msgstr ""
 
-#: src/info.c:301
+#: src/info.c:338
 msgid "Edit your personal information"
 msgstr ""
 
-#: src/info.c:302
+#: src/info.c:339
 msgid ""
 "All items below are optional. Enter only the information with which you feel "
 "comfortable."
 msgstr ""
 
-#: src/process_cmds.c:93
+#: src/process_cmds.c:94
 msgid "Beep received"
 msgstr ""
 
-#: src/process_cmds.c:95
+#: src/process_cmds.c:96
 msgid "Signal from you is denied"
 msgstr ""
 
-#: src/process_cmds.c:97
+#: src/process_cmds.c:98
 msgid "Signals are denied"
 msgstr ""
 
-#: src/process_cmds.c:177
+#: src/process_cmds.c:179
 msgid "Board message"
 msgstr ""
 
-#: src/process_cmds.c:217
+#: src/process_cmds.c:219
 msgid "Buddy list"
 msgstr ""
 
-#: src/process_cmds.c:230
+#: src/process_cmds.c:232
 #, c-format
 msgid "%s request your buddy list"
 msgstr ""

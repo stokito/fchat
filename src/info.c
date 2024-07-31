@@ -11,31 +11,27 @@ static gchar* extract_param(const gchar *from_codeset, const gchar *str_info, co
 	begin_pos += strlen(key) + 1;
 	gchar *end_pos = NULL;
 	end_pos = strchr(begin_pos, FCHAT_INFO_KEY_SEPARATOR);
-	gsize len = end_pos ? end_pos - begin_pos : -1;
+	gsize len = end_pos ? end_pos - begin_pos : strlen(begin_pos);
 
 	if (from_codeset) {
-		return g_convert(begin_pos, len, "UTF-8", from_codeset, NULL, NULL, NULL);
+		return g_convert(begin_pos, (gssize)len, "UTF-8", from_codeset, NULL, NULL, NULL);
 	} else {
-		if (len == -1) {
-			return g_strdup(begin_pos);
-		} else {
-			return g_strndup(begin_pos, len);
-		}
+		return g_strndup(begin_pos, len);
 	}
 }
 
 FChatBuddyInfo *fchat_parse_buddy_info(const gchar *str_info, const gchar *from_codeset) {
-// FChatVersion[2]4.6.1[2]FullName[2]Sergey Ponomarev[2]Male[2]1[2]Day[2]23[2]Month[2]12[2]Year[2]2000
-// Личная иформация передаётся строкой где каждый параметр отделён символом #2
-// В личной информации передаётся версия ФЧАТ (не путать с версией протокола!).
-// Её мы деликатно игнорируем ибо это не персональная ифнормация
+	// FChatVersion[2]4.6.1[2]FullName[2]Sergey Ponomarev[2]Male[2]1[2]Day[2]23[2]Month[2]12[2]Year[2]2000
+	// The personal info is a string where each parameter is separated with a symbol #2.
+	// It contains a version of FChat (don't be confused with a version of a protocol).
+	// We ignore the version since it's not personal information.
 
 	FChatBuddyInfo *info = g_new0(FChatBuddyInfo, 1);
 	info->full_name = extract_param(from_codeset, str_info, "FullName");
 
 	gchar *male = extract_param(NULL, str_info, "Male");
 	if (male) {
-		info->male = (gboolean)(atoi(male)) ? FCHAT_BUDDY_MALE: FCHAT_BUDDY_FEMALE;
+		info->male = *male == '1' ? FCHAT_BUDDY_MALE: FCHAT_BUDDY_FEMALE;
 		g_free(male);
 	} else {
 		info->male = FCHAT_BUDDY_MALE_NOT_SPECIFIED;
@@ -44,7 +40,7 @@ FChatBuddyInfo *fchat_parse_buddy_info(const gchar *str_info, const gchar *from_
 	gchar *num;
 	num = extract_param(NULL, str_info, "Day");
 	if (num) {
-		info->birthday_day = atoi(num);
+		info->birthday_day = (gint8)atoi(num);
 		g_free(num);
 	} else {
 		info->birthday_day = 0;
@@ -52,7 +48,7 @@ FChatBuddyInfo *fchat_parse_buddy_info(const gchar *str_info, const gchar *from_
 
 	num = extract_param(NULL, str_info, "Month");
 	if (num) {
-		info->birthday_month = atoi(num);
+		info->birthday_month = (gint8)atoi(num);
 		g_free(num);
 	} else {
 		info->birthday_month = 0;
@@ -60,7 +56,7 @@ FChatBuddyInfo *fchat_parse_buddy_info(const gchar *str_info, const gchar *from_
 
 	num = extract_param(NULL, str_info, "Year");
 	if (num) {
-		info->birthday_year = atoi(num);
+		info->birthday_year = (gint)atoi(num);
 		g_free(num);
 	} else {
 		info->birthday_year = 0;
@@ -75,25 +71,27 @@ FChatBuddyInfo *fchat_parse_buddy_info(const gchar *str_info, const gchar *from_
 }
 
 static void add_str_param_to_info(GString *info, const gchar *key, const gchar *param, const gchar *from_codeset) {
-	if (param) {
-		g_string_append(info, key);
-		g_string_append_c(info, FCHAT_INFO_KEY_SEPARATOR);
-		gchar *converted_param = g_convert(param, -1, from_codeset, "UTF-8", NULL, NULL, NULL);
-		g_string_append(info, converted_param);
-		g_free(converted_param);
-		g_string_append_c(info, FCHAT_INFO_KEY_SEPARATOR);
+	if (!param) {
+		return;
 	}
+	g_string_append(info, key);
+	g_string_append_c(info, FCHAT_INFO_KEY_SEPARATOR);
+	gchar *converted_param = g_convert(param, -1, from_codeset, "UTF-8", NULL, NULL, NULL);
+	g_string_append(info, converted_param);
+	g_free(converted_param);
+	g_string_append_c(info, FCHAT_INFO_KEY_SEPARATOR);
 }
 
 static void add_int_param_to_info(GString *info, const gchar *key, gint param, gint null_val) {
-	if (param != null_val) {
-		g_string_append(info, key);
-		g_string_append_c(info, FCHAT_INFO_KEY_SEPARATOR);
-		gchar *str_param = g_strdup_printf("%d", param);
-		g_string_append(info, str_param);
-		g_free(str_param);
-		g_string_append_c(info, FCHAT_INFO_KEY_SEPARATOR);
+	if (param == null_val) {
+		return;
 	}
+	g_string_append(info, key);
+	g_string_append_c(info, FCHAT_INFO_KEY_SEPARATOR);
+	gchar *str_param = g_strdup_printf("%d", param);
+	g_string_append(info, str_param);
+	g_free(str_param);
+	g_string_append_c(info, FCHAT_INFO_KEY_SEPARATOR);
 }
 
 gchar *fchat_buddy_info_serialize(FChatBuddyInfo *info, const gchar *from_codeset) {
@@ -102,8 +100,8 @@ gchar *fchat_buddy_info_serialize(FChatBuddyInfo *info, const gchar *from_codese
 	add_str_param_to_info(data, "FChatVersion", FCHAT_MY_PROGRAM_VERSION, from_codeset);
 	if (info != NULL) {
 		add_str_param_to_info(data, "FullName", info->full_name, from_codeset);
-		add_str_param_to_info(data, "Address",  info->address, from_codeset);
-		add_str_param_to_info(data, "Phone",    info->phone, from_codeset);
+		add_str_param_to_info(data, "Address", info->address, from_codeset);
+		add_str_param_to_info(data, "Phone", info->phone, from_codeset);
 		add_int_param_to_info(data, "Male", info->male, FCHAT_BUDDY_MALE_NOT_SPECIFIED);
 		add_int_param_to_info(data, "Day", info->birthday_day, 0);
 		add_int_param_to_info(data, "Month", info->birthday_month, 0);
@@ -177,10 +175,10 @@ fchat_format_info(PurpleConnection *gc, PurpleRequestFields *fields)
 	info->male = info->male - 1;
 
 	field  = purple_request_fields_get_field(fields, "birthday_day");
-	info->birthday_day = purple_request_field_choice_get_value(field);
+	info->birthday_day = (gint8)purple_request_field_choice_get_value(field);
 
 	field  = purple_request_fields_get_field(fields, "birthday_month");
-	info->birthday_month = purple_request_field_choice_get_value(field);
+	info->birthday_month = (gint8)purple_request_field_choice_get_value(field);
 
 	field  = purple_request_fields_get_field(fields, "birthday_year");
 	info->birthday_year = purple_request_field_choice_get_value(field);
@@ -204,16 +202,56 @@ fchat_format_info(PurpleConnection *gc, PurpleRequestFields *fields)
 	info->additional = g_strdup(purple_request_field_string_get_value(field));
 
 	GKeyFile *info_fields = g_key_file_new();
-	g_key_file_set_string(info_fields, "info", "full_name", info->full_name);
-	g_key_file_set_integer(info_fields, "info", "male", info->male);
-	g_key_file_set_integer(info_fields, "info", "birthday_day", info->birthday_day);
-	g_key_file_set_integer(info_fields, "info", "birthday_month", info->birthday_month);
-	g_key_file_set_integer(info_fields, "info", "birthday_year", info->birthday_year);
-	g_key_file_set_string(info_fields, "info", "address", info->address);
-	g_key_file_set_string(info_fields, "info", "phone", info->phone);
-	g_key_file_set_string(info_fields, "info", "email", info->email);
-	g_key_file_set_string(info_fields, "info", "interest", info->interest);
-	g_key_file_set_string(info_fields, "info", "additional", info->additional);
+	if (info->full_name) {
+		g_key_file_set_string(info_fields, "info", "full_name", info->full_name);
+	} else {
+		g_key_file_remove_key(info_fields, "info", "full_name", NULL);
+	}
+	if (info->male) {
+		g_key_file_set_integer(info_fields, "info", "male", info->male);
+	} else {
+		g_key_file_remove_key(info_fields, "info", "male", NULL);
+	}
+	if (info->birthday_day) {
+		g_key_file_set_integer(info_fields, "info", "birthday_day", info->birthday_day);
+	} else {
+		g_key_file_remove_key(info_fields, "info", "birthday_day", NULL);
+	}
+	if (info->birthday_month) {
+		g_key_file_set_integer(info_fields, "info", "birthday_month", info->birthday_month);
+	} else {
+		g_key_file_remove_key(info_fields, "info", "birthday_month", NULL);
+	}
+	if (info->birthday_year) {
+		g_key_file_set_integer(info_fields, "info", "birthday_year", info->birthday_year);
+	} else {
+		g_key_file_remove_key(info_fields, "info", "birthday_year", NULL);
+	}
+	if (info->address) {
+		g_key_file_set_string(info_fields, "info", "address", info->address);
+	} else {
+		g_key_file_remove_key(info_fields, "info", "address", NULL);
+	}
+	if (info->phone) {
+		g_key_file_set_string(info_fields, "info", "phone", info->phone);
+	} else {
+		g_key_file_remove_key(info_fields, "info", "phone", NULL);
+	}
+	if (info->email) {
+		g_key_file_set_string(info_fields, "info", "email", info->email);
+	} else {
+		g_key_file_remove_key(info_fields, "info", "email", NULL);
+	}
+	if (info->interest) {
+		g_key_file_set_string(info_fields, "info", "interest", info->interest);
+	} else {
+		g_key_file_remove_key(info_fields, "info", "interest", NULL);
+	}
+	if (info->additional) {
+		g_key_file_set_string(info_fields, "info", "additional", info->additional);
+	} else {
+		g_key_file_remove_key(info_fields, "info", "additional", NULL);
+	}
 	p = g_key_file_to_data(info_fields, NULL, NULL);
 	g_key_file_free(info_fields);
 
@@ -320,8 +358,8 @@ FChatBuddyInfo *fchat_load_my_buddy_info(PurpleAccount *account) {
 	if (g_key_file_load_from_data(info_fields, serialized_info, -1, G_KEY_FILE_NONE, &error)) {
 		info->full_name = g_key_file_get_string(info_fields, "info", "full_name", NULL);
 		info->male = g_key_file_get_integer(info_fields, "info", "male", NULL);
-		info->birthday_day = g_key_file_get_integer(info_fields, "info", "birthday_day", NULL);
-		info->birthday_month = g_key_file_get_integer(info_fields, "info", "birthday_month", NULL);
+		info->birthday_day = (gint8)g_key_file_get_integer(info_fields, "info", "birthday_day", NULL);
+		info->birthday_month = (gint8)g_key_file_get_integer(info_fields, "info", "birthday_month", NULL);
 		info->birthday_year = g_key_file_get_integer(info_fields, "info", "birthday_year", NULL);
 		info->address = g_key_file_get_string(info_fields, "info", "address", NULL);
 		info->phone = g_key_file_get_string(info_fields, "info", "phone", NULL);

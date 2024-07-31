@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.12)
 project (fchat)
 #add_library(fchat src/fchat.c)
 set (fchat_VERSION_MAJOR 1)
-set (fchat_VERSION_MINOR 0)
+set (fchat_VERSION_MINOR 2)
 
 # Set global compiler-specific flags
 
